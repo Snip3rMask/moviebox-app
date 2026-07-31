@@ -24,7 +24,7 @@
 
                 <View
                     android:layout_width="match_parent"
-                    android:layout_height="260dp"
+                    android:layout_height="340dp"
                     android:background="@drawable/skeleton_hero" />
 
                 <LinearLayout
@@ -416,7 +416,7 @@
             <androidx.viewpager2.widget.ViewPager2
                 android:id="@+id/carousel"
                 android:layout_width="match_parent"
-                android:layout_height="260dp" />
+                android:layout_height="340dp" />
 
             <LinearLayout
                 android:id="@+id/dotsIndicator"
