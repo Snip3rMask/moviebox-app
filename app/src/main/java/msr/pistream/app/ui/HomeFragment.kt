@@ -1,5 +1,6 @@
 package msr.pistream.app.ui
 
+import android.animation.ValueAnimator
 import android.content.Intent
 import android.graphics.drawable.GradientDrawable
 import android.os.Bundle
@@ -27,6 +28,7 @@ import msr.pistream.shared.data.MovieBoxRepository
 import msr.pistream.shared.data.model.Subject
 import msr.pistream.app.ui.adapter.CarouselAdapter
 import msr.pistream.app.ui.adapter.PosterAdapter
+import java.util.concurrent.atomic.AtomicInteger
 
 class HomeFragment : Fragment() {
 
@@ -49,9 +51,11 @@ class HomeFragment : Fragment() {
     private lateinit var carousel: ViewPager2
     private lateinit var dotsIndicator: LinearLayout
     private lateinit var rowsContainer: LinearLayout
+    private lateinit var skeletonContainer: LinearLayout
     private var dots: List<View> = emptyList()
     private var carouselCount = 0
     private var carouselJob: Job? = null
+    private var skeletonAnimator: ValueAnimator? = null
 
     private val pageCallback = object : ViewPager2.OnPageChangeCallback() {
         override fun onPageSelected(position: Int) {
@@ -68,6 +72,7 @@ class HomeFragment : Fragment() {
         carousel = v.findViewById(R.id.carousel)
         dotsIndicator = v.findViewById(R.id.dotsIndicator)
         rowsContainer = v.findViewById(R.id.rowsContainer)
+        skeletonContainer = v.findViewById(R.id.skeletonContainer)
 
         // Let the outer NestedScrollView handle vertical scrolling.
         (carousel.getChildAt(0) as? RecyclerView)?.isNestedScrollingEnabled = false
@@ -93,21 +98,35 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        showSkeleton()
         lifecycleScope.launch {
             try {
                 repo.ensureLogin()
             } catch (e: Exception) {
                 Toast.makeText(requireContext(), e.message ?: "Login failed", Toast.LENGTH_LONG).show()
+                hideSkeleton()
                 return@launch
             }
-            loadCarousel()
-            for (row in rows) addRow(row.title, row.categoryType)
+            val remaining = AtomicInteger(rows.size + 1)
+            fun done() {
+                if (remaining.decrementAndGet() == 0) hideSkeleton()
+            }
+            lifecycleScope.launch {
+                try { loadCarousel() } finally { done() }
+            }
+            for (row in rows) {
+                lifecycleScope.launch {
+                    try { addRow(row.title, row.categoryType) } finally { done() }
+                }
+            }
         }
     }
 
     override fun onDestroyView() {
         carouselJob?.cancel()
         carouselJob = null
+        skeletonAnimator?.cancel()
+        skeletonAnimator = null
         carousel.unregisterOnPageChangeCallback(pageCallback)
         super.onDestroyView()
     }
@@ -180,24 +199,40 @@ class HomeFragment : Fragment() {
         }
     }
 
-    private fun addRow(title: String, categoryType: String) {
+    private suspend fun addRow(title: String, categoryType: String) {
         val row = layoutInflater.inflate(R.layout.item_row, rowsContainer, false)
         row.findViewById<TextView>(R.id.rowTitle).text = title
         val list = row.findViewById<RecyclerView>(R.id.rowList)
         list.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.HORIZONTAL, false)
         rowsContainer.addView(row, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-        lifecycleScope.launch {
-            try {
-                val items = repo.homeRow(categoryType)
-                if (items.isEmpty()) {
-                    rowsContainer.removeView(row)
-                    return@launch
-                }
-                list.adapter = PosterAdapter(items, { openDetail(it) }, itemWidthDp = 130)
-            } catch (e: Exception) {
+        try {
+            val items = repo.homeRow(categoryType)
+            if (items.isEmpty()) {
                 rowsContainer.removeView(row)
+                return
             }
+            list.adapter = PosterAdapter(items, { openDetail(it) }, itemWidthDp = 130)
+        } catch (e: Exception) {
+            rowsContainer.removeView(row)
         }
+    }
+
+    private fun showSkeleton() {
+        skeletonContainer.isVisible = true
+        skeletonAnimator?.cancel()
+        skeletonAnimator = ValueAnimator.ofFloat(0.4f, 1f, 0.4f).apply {
+            duration = 1100
+            repeatCount = ValueAnimator.INFINITE
+            addUpdateListener { skeletonContainer.alpha = it.animatedValue as Float }
+            start()
+        }
+    }
+
+    private fun hideSkeleton() {
+        skeletonAnimator?.cancel()
+        skeletonAnimator = null
+        skeletonContainer.alpha = 1f
+        skeletonContainer.isVisible = false
     }
 
     private fun openDetail(subject: Subject) {
