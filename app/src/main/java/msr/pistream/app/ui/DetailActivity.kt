@@ -194,14 +194,14 @@ class DetailActivity : AppCompatActivity() {
         chip.chipStrokeWidth = 0f
         chip.setTextColor(getColor(if (danger) R.color.danger else R.color.text_primary))
         chip.textSize = 12f
-        chip.chipMinHeight = (28 * density).toInt()
+        chip.chipMinHeight = 28 * density
         chip.chipCornerRadius = 8 * density
-        chip.ensureMinTouchTargetSize = false
+        chip.setEnsureMinTouchTargetSize(false)
         if (star) {
             chip.chipIcon = ContextCompat.getDrawable(this, R.drawable.ic_star)
             chip.chipIconSize = (14 * density)
             chip.chipIconTint = ColorStateList.valueOf(getColor(R.color.accent))
-            chip.chipIconStartPadding = (3 * density)
+            chip.setChipIconStartPadding(3 * density)
             chip.chipStartPadding = (6 * density)
         }
         group.addView(chip)
@@ -309,9 +309,9 @@ class DetailActivity : AppCompatActivity() {
             )
             chipStrokeWidth = 0f
             setTextColor(getColor(R.color.text_primary))
-            chipMinHeight = (36 * density).toInt()
+            chipMinHeight = 36 * density
             chipCornerRadius = 10 * density
-            ensureMinTouchTargetSize = false
+            setEnsureMinTouchTargetSize(false)
             setOnClickListener { onClick(this) }
         }
     }
