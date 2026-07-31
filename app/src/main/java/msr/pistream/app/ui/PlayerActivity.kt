@@ -65,9 +65,13 @@ class PlayerActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.playerTitle).text = title
         findViewById<View>(R.id.backBtn).setOnClickListener { finish() }
         findViewById<View>(R.id.settingsBtn).setOnClickListener { showSettings() }
-        playerView.setControllerVisibilityListener { visibility ->
-            findViewById<View>(R.id.topBar).isVisible = visibility == View.VISIBLE
-        }
+        playerView.setControllerVisibilityListener(
+            object : PlayerView.ControllerVisibilityListener {
+                override fun onControllerVisibilityChange(visibility: Int) {
+                    findViewById<View>(R.id.topBar).isVisible = visibility == View.VISIBLE
+                }
+            }
+        )
 
         setupPlayer(url, cookie)
     }
@@ -157,16 +161,16 @@ class PlayerActivity : AppCompatActivity() {
         } else {
             val group = videoGroups.first()
             val params = player?.trackSelectionParameters
-            val override = params?.overrides?.get(group.trackGroup)
+            val override = params?.overrides?.get(group.mediaTrackGroup)
             val fixed = override != null && override.tracks.isNotEmpty()
-            if (group.trackGroup.length > 1) {
+            if (group.mediaTrackGroup.length > 1) {
                 addRow(content, getString(R.string.auto), !fixed) {
                     setQuality(group, null)
                     rebuildSettings(dialog)
                 }
             }
-            for (i in 0 until group.trackGroup.length) {
-                val f = group.trackGroup.getFormat(i)
+            for (i in 0 until group.mediaTrackGroup.length) {
+                val f = group.mediaTrackGroup.getFormat(i)
                 val selected = if (fixed) override!!.tracks.contains(i) else i == selectedTrackIndex(group)
                 addRow(content, qualityLabel(f), selected) {
                     setQuality(group, i)
@@ -182,8 +186,8 @@ class PlayerActivity : AppCompatActivity() {
             addNote(content, getString(R.string.no_audio))
         } else {
             for (g in audioGroups) {
-                for (i in 0 until g.trackGroup.length) {
-                    val f = g.trackGroup.getFormat(i)
+                for (i in 0 until g.mediaTrackGroup.length) {
+                    val f = g.mediaTrackGroup.getFormat(i)
                     addRow(content, languageName(f), i == selectedTrackIndex(g)) {
                         setAudio(g, i)
                         rebuildSettings(dialog)
@@ -204,10 +208,10 @@ class PlayerActivity : AppCompatActivity() {
                 rebuildSettings(dialog)
             }
             for (g in textGroups) {
-                for (i in 0 until g.trackGroup.length) {
-                    val f = g.trackGroup.getFormat(i)
+                for (i in 0 until g.mediaTrackGroup.length) {
+                    val f = g.mediaTrackGroup.getFormat(i)
                     addRow(content, languageName(f), i == selectedTrackIndex(g)) {
-                        setSubtitles(TrackSelectionOverride(g.trackGroup, ImmutableList.of(i)))
+                        setSubtitles(TrackSelectionOverride(g.mediaTrackGroup, ImmutableList.of(i)))
                         rebuildSettings(dialog)
                     }
                 }
@@ -231,8 +235,10 @@ class PlayerActivity : AppCompatActivity() {
     // ---- track selection ----
 
     private fun selectedTrackIndex(g: Tracks.Group): Int {
-        val f = g.trackFormat ?: return -1
-        return g.trackGroup.indexOf(f)
+        for (i in 0 until g.length) {
+            if (g.isTrackSelected(i)) return i
+        }
+        return -1
     }
 
     private fun setQuality(g: Tracks.Group, index: Int?) {
@@ -240,7 +246,7 @@ class PlayerActivity : AppCompatActivity() {
         val b = p.trackSelectionParameters.buildUpon()
         b.clearOverridesOfType(C.TRACK_TYPE_VIDEO)
         if (index != null) {
-            b.setOverrideForType(TrackSelectionOverride(g.trackGroup, ImmutableList.of(index)))
+            b.setOverrideForType(TrackSelectionOverride(g.mediaTrackGroup, ImmutableList.of(index)))
         }
         p.trackSelectionParameters = b.build()
     }
@@ -249,7 +255,7 @@ class PlayerActivity : AppCompatActivity() {
         val p = player ?: return
         val b = p.trackSelectionParameters.buildUpon()
         b.clearOverridesOfType(C.TRACK_TYPE_AUDIO)
-        b.setOverrideForType(TrackSelectionOverride(g.trackGroup, ImmutableList.of(index)))
+        b.setOverrideForType(TrackSelectionOverride(g.mediaTrackGroup, ImmutableList.of(index)))
         p.trackSelectionParameters = b.build()
     }
 
