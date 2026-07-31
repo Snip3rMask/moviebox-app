@@ -1,4 +1,5 @@
 package com.msr.moviebox.ui
+import com.msr.moviebox.R
 
 import android.os.Bundle
 import android.widget.Toast

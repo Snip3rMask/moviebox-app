@@ -1,5 +1,6 @@
 package com.msr.moviebox.ui
 
+import com.msr.moviebox.R
 import android.content.Intent
 import android.os.Bundle
 import android.view.ViewGroup
