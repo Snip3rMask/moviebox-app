@@ -8,7 +8,9 @@ Built as a clean-room Kotlin port of the verified API flow (anonymous JWT +
 `x-client-token` / `x-tr-signature` HMAC signing).
 
 ## Features
-- Home: Trending / Bollywood / Hollywood / Korean & Turkish Drama / Anime rows
+- Home: auto-scrolling hero carousel + Trending / Bollywood / Hollywood / Korean &
+  Turkish Drama / Anime rows
+- Bottom navigation: Home / Downloads / Settings tabs (fragments kept alive)
 - Full-text search
 - Detail page: poster, meta, IMDb score, description, audio (dub) selection
 - Series: season → episode list from `season-info`
@@ -30,13 +32,17 @@ app/src/main/java/msr/pistream/app/
 │       ├── SeasonInfo.kt
 │       └── PlayStream.kt
 └── ui/
-    ├── MainActivity.kt        # home rows
+    ├── MainActivity.kt        # nav shell (Home/Downloads/Settings)
+    ├── HomeFragment.kt        # home rows + hero carousel
+    ├── DownloadsFragment.kt   # downloads tab (empty state)
+    ├── SettingsFragment.kt    # settings tab (version/package)
     ├── SearchActivity.kt      # search grid
     ├── DetailActivity.kt      # detail + episodes + dubs
     ├── PlayerActivity.kt      # ExoPlayer (DASH/HLS + cookie)
     └── adapter/
         ├── PosterAdapter.kt
-        └── EpisodeAdapter.kt
+        ├── EpisodeAdapter.kt
+        └── CarouselAdapter.kt
 ```
 
 ## Build locally
