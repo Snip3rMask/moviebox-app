@@ -7,7 +7,7 @@
     android:orientation="horizontal">
 
     <com.google.android.material.navigationrail.NavigationRailView
-        android:id="@+id/sideNav"
+        android:id="@+id/bottomNav"
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:background="@color/surface"

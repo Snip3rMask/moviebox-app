@@ -1,22 +1,18 @@
 package msr.pistream.app.ui
 
-import android.content.pm.PackageManager
-import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.navigation.NavigationBarView
-import com.google.android.material.navigationrail.NavigationRailView
 import msr.pistream.app.R
 
 /**
- * Main shell: hosts navigation (Home / Downloads / Settings): bottom bar on phones,
- * left-side rail on Android TV / Fire TV
- * and keeps each tab's fragment alive while switching.
+ * Main shell hosting navigation (Home / Downloads / Settings).
+ * Portrait phones get a bottom bar; landscape phones and Android TV /
+ * Fire TV get a left-side rail (via layout resource qualifiers).
  */
 class MainActivity : AppCompatActivity() {
 
@@ -31,13 +27,10 @@ class MainActivity : AppCompatActivity() {
         window.statusBarColor = Color.TRANSPARENT
         window.navigationBarColor = ContextCompat.getColor(this, R.color.surface)
 
-        val rail = useRail()
-        setContentView(if (rail) R.layout.activity_main_tv else R.layout.activity_main)
-        nav = if (rail) {
-            findViewById<NavigationRailView>(R.id.sideNav)
-        } else {
-            findViewById<BottomNavigationView>(R.id.bottomNav)
-        }
+        // layout-land / layout-television variants automatically give a
+        // left rail on landscape phones and on Android TV / Fire TV.
+        setContentView(R.layout.activity_main)
+        nav = findViewById(R.id.bottomNav)
         nav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> showTab(TAG_HOME)
@@ -57,18 +50,6 @@ class MainActivity : AppCompatActivity() {
                 else -> R.id.nav_home
             }
         }
-    }
-
-    /**
-     * Use the left-side rail on Android TV / Fire TV and on phones in
-     * landscape; portrait phones keep the bottom bar.
-     */
-    private fun useRail(): Boolean {
-        if (packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) return true
-        val config = resources.configuration
-        val uiMode = config.uiMode and Configuration.UI_MODE_TYPE_MASK
-        if (uiMode == Configuration.UI_MODE_TYPE_TELEVISION) return true
-        return config.orientation == Configuration.ORIENTATION_LANDSCAPE
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
