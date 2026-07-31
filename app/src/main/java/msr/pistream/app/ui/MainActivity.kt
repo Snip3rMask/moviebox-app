@@ -1,5 +1,7 @@
 package msr.pistream.app.ui
 
+import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
@@ -7,15 +9,18 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
+import com.google.android.material.navigation.NavigationBarView
+import com.google.android.material.navigationrail.NavigationRailView
 import msr.pistream.app.R
 
 /**
- * Main shell: hosts the bottom navigation (Home / Downloads / Settings)
+ * Main shell: hosts navigation (Home / Downloads / Settings): bottom bar on phones,
+ * left-side rail on Android TV / Fire TV
  * and keeps each tab's fragment alive while switching.
  */
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var nav: BottomNavigationView
+    private lateinit var nav: NavigationBarView<*>
     private var currentTag: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -26,9 +31,13 @@ class MainActivity : AppCompatActivity() {
         window.statusBarColor = Color.TRANSPARENT
         window.navigationBarColor = ContextCompat.getColor(this, R.color.surface)
 
-        setContentView(R.layout.activity_main)
-
-        nav = findViewById(R.id.bottomNav)
+        val tv = isTv()
+        setContentView(if (tv) R.layout.activity_main_tv else R.layout.activity_main)
+        nav = if (tv) {
+            findViewById<NavigationRailView>(R.id.sideNav)
+        } else {
+            findViewById<BottomNavigationView>(R.id.bottomNav)
+        }
         nav.setOnItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.nav_home -> showTab(TAG_HOME)
@@ -48,6 +57,13 @@ class MainActivity : AppCompatActivity() {
                 else -> R.id.nav_home
             }
         }
+    }
+
+    /** Phones use a bottom bar; Android TV / Fire TV get a left-side rail. */
+    private fun isTv(): Boolean {
+        val uiMode = resources.configuration.uiMode and Configuration.UI_MODE_TYPE_MASK
+        return uiMode == Configuration.UI_MODE_TYPE_TELEVISION ||
+            packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
