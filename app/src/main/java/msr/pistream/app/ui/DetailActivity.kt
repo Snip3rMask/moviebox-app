@@ -402,11 +402,19 @@ class DetailActivity : AppCompatActivity() {
                     Toast.makeText(this@DetailActivity, R.string.no_streams, Toast.LENGTH_LONG).show()
                     return@launch
                 }
+                val idName = LinkedHashMap<String, String>()
+                d.dubs.forEach { idName[it.subjectId] = it.lanName }
+                idName.putIfAbsent(subjectId, "Default")
                 startActivity(
                     Intent(this@DetailActivity, PlayerActivity::class.java)
                         .putExtra("url", chosen.url)
                         .putExtra("cookie", chosen.signCookie ?: "")
                         .putExtra("title", d.title)
+                        .putExtra("subjectId", subjectId)
+                        .putExtra("dubIds", ArrayList(idName.keys))
+                        .putExtra("dubNames", ArrayList(idName.values))
+                        .putExtra("se", se)
+                        .putExtra("ep", ep)
                 )
             } catch (e: Exception) {
                 Toast.makeText(this@DetailActivity, R.string.failed_to_load, Toast.LENGTH_LONG).show()

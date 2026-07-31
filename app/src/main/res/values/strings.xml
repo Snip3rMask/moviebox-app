@@ -31,4 +31,15 @@
     <string name="show_less">Show less</string>
     <string name="cam">CAM</string>
     <string name="viewers_count">%1$s viewers</string>
+    <string name="playback_settings">Playback settings</string>
+    <string name="quality">Quality</string>
+    <string name="subtitles">Subtitles</string>
+    <string name="auto">Auto</string>
+    <string name="off">Off</string>
+    <string name="no_subtitles">Subtitles not available for this stream</string>
+    <string name="no_audio">No alternative audio in this stream</string>
+    <string name="no_quality">Default quality</string>
+    <string name="switching_audio">Switching audio…</string>
+    <string name="dub">Audio (Dub)</string>
+    <string name="close">Close</string>
 </resources>

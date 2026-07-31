@@ -62,6 +62,15 @@ class MovieBoxRepository(
         return null
     }
 
+    /**
+     * Returns the first playable stream for a specific subject (used for
+     * switching dub/audio inside the player without touching other dubs).
+     */
+    suspend fun streamFor(subjectId: String, se: Int, ep: Int): PlayStream? {
+        ensureLogin()
+        return api.playInfo(subjectId, se, ep).firstOrNull()
+    }
+
     /** Builds the episode list for a series from its season info. */
     fun buildEpisodes(
         subjectId: String,
