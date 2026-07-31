@@ -20,7 +20,7 @@ import msr.pistream.app.R
  */
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var nav: NavigationBarView<*>
+    private lateinit var nav: NavigationBarView
     private var currentTag: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
