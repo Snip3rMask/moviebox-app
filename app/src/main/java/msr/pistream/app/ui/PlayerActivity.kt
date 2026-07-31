@@ -24,7 +24,6 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.ui.PlayerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.common.collect.ImmutableList
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import msr.pistream.app.R
@@ -67,7 +66,7 @@ class PlayerActivity : AppCompatActivity() {
         findViewById<View>(R.id.settingsBtn).setOnClickListener { showSettings() }
         playerView.setControllerVisibilityListener(
             object : PlayerView.ControllerVisibilityListener {
-                override fun onControllerVisibilityChange(visibility: Int) {
+                override fun onVisibilityChanged(visibility: Int) {
                     findViewById<View>(R.id.topBar).isVisible = visibility == View.VISIBLE
                 }
             }
@@ -162,7 +161,7 @@ class PlayerActivity : AppCompatActivity() {
             val group = videoGroups.first()
             val params = player?.trackSelectionParameters
             val override = params?.overrides?.get(group.mediaTrackGroup)
-            val fixed = override != null && override.tracks.isNotEmpty()
+            val fixed = override != null && override.trackIndices.isNotEmpty()
             if (group.mediaTrackGroup.length > 1) {
                 addRow(content, getString(R.string.auto), !fixed) {
                     setQuality(group, null)
@@ -171,7 +170,7 @@ class PlayerActivity : AppCompatActivity() {
             }
             for (i in 0 until group.mediaTrackGroup.length) {
                 val f = group.mediaTrackGroup.getFormat(i)
-                val selected = if (fixed) override!!.tracks.contains(i) else i == selectedTrackIndex(group)
+                val selected = if (fixed) override!!.trackIndices.contains(i) else i == selectedTrackIndex(group)
                 addRow(content, qualityLabel(f), selected) {
                     setQuality(group, i)
                     rebuildSettings(dialog)
@@ -211,7 +210,7 @@ class PlayerActivity : AppCompatActivity() {
                 for (i in 0 until g.mediaTrackGroup.length) {
                     val f = g.mediaTrackGroup.getFormat(i)
                     addRow(content, languageName(f), i == selectedTrackIndex(g)) {
-                        setSubtitles(TrackSelectionOverride(g.mediaTrackGroup, ImmutableList.of(i)))
+                        setSubtitles(TrackSelectionOverride(g.mediaTrackGroup, i))
                         rebuildSettings(dialog)
                     }
                 }
@@ -246,7 +245,7 @@ class PlayerActivity : AppCompatActivity() {
         val b = p.trackSelectionParameters.buildUpon()
         b.clearOverridesOfType(C.TRACK_TYPE_VIDEO)
         if (index != null) {
-            b.setOverrideForType(TrackSelectionOverride(g.mediaTrackGroup, ImmutableList.of(index)))
+            b.setOverrideForType(TrackSelectionOverride(g.mediaTrackGroup, index))
         }
         p.trackSelectionParameters = b.build()
     }
@@ -255,7 +254,7 @@ class PlayerActivity : AppCompatActivity() {
         val p = player ?: return
         val b = p.trackSelectionParameters.buildUpon()
         b.clearOverridesOfType(C.TRACK_TYPE_AUDIO)
-        b.setOverrideForType(TrackSelectionOverride(g.mediaTrackGroup, ImmutableList.of(index)))
+        b.setOverrideForType(TrackSelectionOverride(g.mediaTrackGroup, index))
         p.trackSelectionParameters = b.build()
     }
 
