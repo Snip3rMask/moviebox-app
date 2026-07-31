@@ -1,12 +1,10 @@
-ext {
-    appVersionCode = (findProperty('versionCode') ?: '1').toString().toInteger()
-    appVersionName = (findProperty('versionName') ?: '1.0.0').toString()
-}
-
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
 }
+
+def appVersionCode = (findProperty('versionCode') ?: '1').toString().toInteger()
+def appVersionName = (findProperty('versionName') ?: '1.0.0').toString()
 
 android {
     namespace 'com.msr.moviebox'
@@ -16,8 +14,8 @@ android {
         applicationId 'com.msr.moviebox'
         minSdk 26
         targetSdk 34
-        versionCode rootProject.ext.appVersionCode
-        versionName rootProject.ext.appVersionName
+        versionCode appVersionCode
+        versionName appVersionName
     }
 
     signingConfigs {
