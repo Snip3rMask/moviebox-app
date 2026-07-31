@@ -20,6 +20,13 @@ Built as a clean-room Kotlin port of the verified API flow (anonymous JWT +
 
 ## Project layout
 ```
+shared/src/main/kotlin/msr/pistream/shared/   # shared data layer (Android + PC)
+├── data/
+│   ├── ApiConfig.kt           # API constants, device info, HMAC key
+│   ├── MovieBoxApi.kt         # signed HTTP client (JWT + HMAC)
+│   ├── MovieBoxRepository.kt  # high-level data access + dub fallback
+│   └── model/                 # Subject / Dub / Episode / SeasonInfo / PlayStream
+
 app/src/main/java/msr/pistream/app/
 ├── data/
 │   ├── ApiConfig.kt           # API constants, device info, HMAC key

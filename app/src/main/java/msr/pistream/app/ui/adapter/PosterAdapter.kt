@@ -8,7 +8,7 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import msr.pistream.app.R
-import msr.pistream.app.data.model.Subject
+import msr.pistream.shared.data.model.Subject
 
 /** Horizontal poster row adapter (also used for the search grid). */
 class PosterAdapter(

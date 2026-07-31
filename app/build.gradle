@@ -69,11 +69,12 @@ dependencies {
     implementation 'androidx.fragment:fragment-ktx:1.6.2'
     implementation 'androidx.viewpager2:viewpager2:1.1.0'
 
-    // Networking
-    implementation 'com.squareup.okhttp3:okhttp:4.12.0'
 
     // Coroutines
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3'
+
+    // Shared data layer (models, API client, repository)
+    implementation project(':shared')
 
     // Media playback (DASH + HLS)
     implementation 'androidx.media3:media3-exoplayer:1.3.1'

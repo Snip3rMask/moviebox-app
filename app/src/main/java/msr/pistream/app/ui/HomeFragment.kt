@@ -23,8 +23,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import msr.pistream.app.R
-import msr.pistream.app.data.MovieBoxRepository
-import msr.pistream.app.data.model.Subject
+import msr.pistream.shared.data.MovieBoxRepository
+import msr.pistream.shared.data.model.Subject
 import msr.pistream.app.ui.adapter.CarouselAdapter
 import msr.pistream.app.ui.adapter.PosterAdapter
 

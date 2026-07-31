@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import msr.pistream.app.data.MovieBoxRepository
+import msr.pistream.shared.data.MovieBoxRepository
 import msr.pistream.app.ui.adapter.PosterAdapter
 import kotlinx.coroutines.launch
 

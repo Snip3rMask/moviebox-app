@@ -26,3 +26,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "MovieboxApp"
 include ':app'
+include ':shared'

@@ -1,10 +1,10 @@
-package msr.pistream.app.data
+package msr.pistream.shared.data
 
-import msr.pistream.app.data.model.Dub
-import msr.pistream.app.data.model.Episode
-import msr.pistream.app.data.model.PlayStream
-import msr.pistream.app.data.model.SeasonInfo
-import msr.pistream.app.data.model.Subject
+import msr.pistream.shared.data.model.Dub
+import msr.pistream.shared.data.model.Episode
+import msr.pistream.shared.data.model.PlayStream
+import msr.pistream.shared.data.model.SeasonInfo
+import msr.pistream.shared.data.model.Subject
 
 /**
  * High-level access to MovieBox data.

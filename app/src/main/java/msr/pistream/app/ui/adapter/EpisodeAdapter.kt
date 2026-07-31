@@ -6,7 +6,7 @@ import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import msr.pistream.app.R
-import msr.pistream.app.data.model.Episode
+import msr.pistream.shared.data.model.Episode
 
 /** Episode list adapter for series detail. */
 class EpisodeAdapter(

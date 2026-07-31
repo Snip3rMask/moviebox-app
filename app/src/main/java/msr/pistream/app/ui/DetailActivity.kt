@@ -15,10 +15,10 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
-import msr.pistream.app.data.MovieBoxRepository
-import msr.pistream.app.data.model.Dub
-import msr.pistream.app.data.model.Episode
-import msr.pistream.app.data.model.Subject
+import msr.pistream.shared.data.MovieBoxRepository
+import msr.pistream.shared.data.model.Dub
+import msr.pistream.shared.data.model.Episode
+import msr.pistream.shared.data.model.Subject
 import msr.pistream.app.ui.adapter.EpisodeAdapter
 import kotlinx.coroutines.launch
 
