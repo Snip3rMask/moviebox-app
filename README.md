@@ -70,6 +70,7 @@ You can also run it manually: **Actions → Build & Release APK → Run workflow
 - HMAC key: double base64-decoded plugin constant (see `MovieBoxApi.kt`).
 - Streams: `subject-api/play-info?subjectId=..&se=..&ep=..` →
   `data.streams[]` with `url`, `format`, `resolutions`, `signCookie`.
+  **Movies use `se=0&ep=0`; series use the actual season/episode.**
 - The `signCookie` must be sent as `Cookie` header on the MPD + segment
   requests (CloudFront signed cookie).
 

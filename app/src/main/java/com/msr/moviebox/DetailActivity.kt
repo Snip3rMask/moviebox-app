@@ -18,6 +18,7 @@ import com.google.android.material.chip.ChipGroup
 import com.msr.moviebox.data.Dub
 import com.msr.moviebox.data.Episode
 import com.msr.moviebox.data.MovieBoxApi
+import com.msr.moviebox.data.PlayStream
 import com.msr.moviebox.data.Subject
 import com.msr.moviebox.ui.EpisodeAdapter
 import kotlinx.coroutines.launch
@@ -150,7 +151,7 @@ class DetailActivity : AppCompatActivity() {
             val first = episodes.firstOrNull() ?: return
             playEpisode(first)
         } else {
-            play(sid, 1, 1)
+            play(sid, 0, 0)
         }
     }
 
@@ -161,16 +162,23 @@ class DetailActivity : AppCompatActivity() {
     private fun play(subjectId: String, se: Int, ep: Int) {
         lifecycleScope.launch {
             try {
-                val streams = MovieBoxApi.playInfo(subjectId, se, ep)
-                val stream = streams.firstOrNull()
-                if (stream == null) {
+                // Try the requested id first, then every dub id as fallback.
+                val candidates = LinkedHashSet<String>()
+                candidates.add(subjectId)
+                subject?.dubs?.forEach { candidates.add(it.subjectId) }
+                var stream: PlayStream? = null
+                for (cid in candidates) {
+                    val streams = MovieBoxApi.playInfo(cid, se, ep)
+                    if (streams.isNotEmpty()) { stream = streams.first(); break }
+                }
+                val chosen = stream ?: run {
                     Toast.makeText(this@DetailActivity, R.string.no_streams, Toast.LENGTH_LONG).show()
                     return@launch
                 }
                 startActivity(
                     Intent(this@DetailActivity, PlayerActivity::class.java)
-                        .putExtra("url", stream.url)
-                        .putExtra("cookie", stream.signCookie ?: "")
+                        .putExtra("url", chosen.url)
+                        .putExtra("cookie", chosen.signCookie ?: "")
                         .putExtra("title", subject?.title ?: "")
                 )
             } catch (e: Exception) {
