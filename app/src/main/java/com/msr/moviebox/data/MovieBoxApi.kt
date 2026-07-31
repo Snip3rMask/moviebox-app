@@ -1,6 +1,10 @@
 package com.msr.moviebox.data
 
 import android.util.Base64
+import com.msr.moviebox.data.model.Dub
+import com.msr.moviebox.data.model.PlayStream
+import com.msr.moviebox.data.model.SeasonInfo
+import com.msr.moviebox.data.model.Subject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -13,47 +17,15 @@ import java.security.MessageDigest
 import java.util.concurrent.TimeUnit
 import javax.crypto.Mac
 import javax.crypto.spec.SecretKeySpec
-import kotlin.random.Random
 
 /**
- * MovieBox mobile API client.
+ * Signed HTTP client for the MovieBox mobile API.
+ *
  * Auth: anonymous JWT returned in the `x-user` response header of a ping request.
  * Every request is signed with x-client-token + x-tr-signature (HmacMD5 over a
- * canonical string). The HMAC key is the DOUBLE base64-decoded plugin constant.
+ * canonical string). See [ApiConfig] for the constants.
  */
 object MovieBoxApi {
-
-    private const val BASE = "https://apig.inmoviebox.com"
-    private val SECRET: ByteArray = Base64.decode(
-        Base64.decode(
-            "NzZpUmwwN3MweFNOOWpxbUVXQXQ3OUVCSlp1bElRSXNWNjRGWnIyTw==",
-            Base64.DEFAULT
-        ),
-        Base64.DEFAULT
-    )
-
-    private const val USER_AGENT =
-        "com.community.mbox.in/50020042 (Linux; U; Android 16; en_IN; " +
-            "sdk_gphone64_x86_64; Build/BP22.250325.006; Cronet/133.0.6876.3)"
-
-    private val deviceId: String = Random.nextBytes(16).joinToString("") { "%02x".format(it) }
-    private val clientInfo: String = JSONObject().apply {
-        put("package_name", "com.community.mbox.in")
-        put("version_name", "3.0.03.0529.03")
-        put("version_code", 50020042)
-        put("os", "android")
-        put("os_version", "16")
-        put("device_id", deviceId)
-        put("install_store", "ps")
-        put("gaid", "d7578036d13336cc")
-        put("brand", "google")
-        put("model", "sdk_gphone64_x86_64")
-        put("system_language", "en")
-        put("net", "NETWORK_WIFI")
-        put("region", "IN")
-        put("timezone", "Asia/Calcutta")
-        put("sp_code", "")
-    }.toString()
 
     @Volatile
     var token: String? = null
@@ -100,20 +72,20 @@ object MovieBoxApi {
             canonicalUrl(url)
         ).joinToString("\n")
         val mac = Mac.getInstance("HmacMD5")
-        mac.init(SecretKeySpec(SECRET, "HmacMD5"))
+        mac.init(SecretKeySpec(ApiConfig.SIGNING_KEY, "HmacMD5"))
         val raw = mac.doFinal(canonical.toByteArray(Charsets.UTF_8))
         return "$ts|2|${Base64.encodeToString(raw, Base64.NO_WRAP)}"
     }
 
     private fun headers(method: String, url: String, body: String?): Map<String, String> {
         val h = linkedMapOf<String, String>()
-        h["user-agent"] = USER_AGENT
+        h["user-agent"] = ApiConfig.USER_AGENT
         h["accept"] = "application/json"
         h["content-type"] = "application/json"
         h["connection"] = "keep-alive"
         h["x-client-token"] = xClientToken()
         h["x-tr-signature"] = signature(method, url, body)
-        h["x-client-info"] = clientInfo
+        h["x-client-info"] = ApiConfig.CLIENT_INFO
         h["x-client-status"] = "0"
         if (method == "POST") h["x-play-mode"] = "2"
         token?.let { h["Authorization"] = "Bearer $it" }
@@ -122,7 +94,7 @@ object MovieBoxApi {
 
     private suspend fun rawGet(path: String): Pair<JSONObject, Map<String, String>> =
         withContext(Dispatchers.IO) {
-            val url = BASE + path
+            val url = ApiConfig.BASE_URL + path
             val req = Request.Builder().url(url).apply {
                 headers(method = "GET", url = url, body = null).forEach { (k, v) -> addHeader(k, v) }
             }.get().build()
@@ -134,7 +106,7 @@ object MovieBoxApi {
 
     private suspend fun rawPost(path: String, json: JSONObject): JSONObject =
         withContext(Dispatchers.IO) {
-            val url = BASE + path
+            val url = ApiConfig.BASE_URL + path
             val payload = json.toString()
             val req = Request.Builder().url(url).apply {
                 headers(method = "POST", url = url, body = payload).forEach { (k, v) -> addHeader(k, v) }
@@ -194,9 +166,7 @@ object MovieBoxApi {
     }
 
     suspend fun loginAnonymous() {
-        val (_, hdrs) = rawGet(
-            "/wefeed-mobile-bff/tab/ranking-list?tabId=0&categoryType=4516404531735022304&page=1&perPage=1"
-        )
+        val (_, hdrs) = rawGet(ApiConfig.ANONYMOUS_LOGIN_PATH)
         val xUser = hdrs["x-user"] ?: error("login failed: no x-user header")
         token = JSONObject(xUser).optString("token").takeIf { it.isNotBlank() } ?: error("login failed")
     }

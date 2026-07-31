@@ -1,4 +1,4 @@
-package com.msr.moviebox
+package com.msr.moviebox.ui
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,11 +7,13 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.msr.moviebox.data.MovieBoxApi
-import com.msr.moviebox.ui.PosterAdapter
+import com.msr.moviebox.data.MovieBoxRepository
+import com.msr.moviebox.ui.adapter.PosterAdapter
 import kotlinx.coroutines.launch
 
 class SearchActivity : AppCompatActivity() {
+
+    private val repo = MovieBoxRepository()
 
     private lateinit var resultsList: RecyclerView
 
@@ -40,7 +42,7 @@ class SearchActivity : AppCompatActivity() {
         if (query.isBlank()) return
         lifecycleScope.launch {
             try {
-                val items = MovieBoxApi.search(query)
+                val items = repo.search(query)
                 resultsList.adapter = PosterAdapter(items, {
                     startActivity(
                         Intent(this@SearchActivity, DetailActivity::class.java)

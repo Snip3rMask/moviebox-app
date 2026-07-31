@@ -1,4 +1,4 @@
-package com.msr.moviebox
+package com.msr.moviebox.ui
 
 import android.content.Intent
 import android.os.Bundle
@@ -11,12 +11,14 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.msr.moviebox.data.MovieBoxApi
-import com.msr.moviebox.data.Subject
-import com.msr.moviebox.ui.PosterAdapter
+import com.msr.moviebox.data.MovieBoxRepository
+import com.msr.moviebox.data.model.Subject
+import com.msr.moviebox.ui.adapter.PosterAdapter
 import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
+
+    private val repo = MovieBoxRepository()
 
     private data class Row(val title: String, val categoryType: String)
 
@@ -49,7 +51,7 @@ class MainActivity : AppCompatActivity() {
         val container = findViewById<LinearLayout>(R.id.rowsContainer)
         lifecycleScope.launch {
             try {
-                MovieBoxApi.loginAnonymous()
+                repo.ensureLogin()
             } catch (e: Exception) {
                 Toast.makeText(this@MainActivity, e.message ?: "Login failed", Toast.LENGTH_LONG).show()
                 return@launch
@@ -75,7 +77,7 @@ class MainActivity : AppCompatActivity() {
         container.addView(row, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT)
         lifecycleScope.launch {
             try {
-                val items = MovieBoxApi.homeRow(categoryType)
+                val items = repo.homeRow(categoryType)
                 if (items.isEmpty()) {
                     container.removeView(row)
                     return@launch

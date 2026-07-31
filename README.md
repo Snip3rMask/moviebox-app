@@ -19,13 +19,24 @@ Built as a clean-room Kotlin port of the verified API flow (anonymous JWT +
 ## Project layout
 ```
 app/src/main/java/com/msr/moviebox/
-├── MainActivity.kt        # home rows
-├── SearchActivity.kt      # search grid
-├── DetailActivity.kt      # detail + episodes + dubs
-├── PlayerActivity.kt      # ExoPlayer (DASH/HLS + cookie)
-├── data/MovieBoxApi.kt    # signed API client
-├── data/Models.kt         # Subject / Dub / Season / PlayStream
-└── ui/Adapters.kt         # poster + episode adapters
+├── data/
+│   ├── ApiConfig.kt           # API constants, device info, HMAC key
+│   ├── MovieBoxApi.kt         # signed HTTP client (JWT + HMAC)
+│   ├── MovieBoxRepository.kt  # high-level data access + dub fallback
+│   └── model/
+│       ├── Subject.kt
+│       ├── Dub.kt
+│       ├── Episode.kt
+│       ├── SeasonInfo.kt
+│       └── PlayStream.kt
+└── ui/
+    ├── MainActivity.kt        # home rows
+    ├── SearchActivity.kt      # search grid
+    ├── DetailActivity.kt      # detail + episodes + dubs
+    ├── PlayerActivity.kt      # ExoPlayer (DASH/HLS + cookie)
+    └── adapter/
+        ├── PosterAdapter.kt
+        └── EpisodeAdapter.kt
 ```
 
 ## Build locally

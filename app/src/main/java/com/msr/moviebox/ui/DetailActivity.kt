@@ -1,8 +1,7 @@
-package com.msr.moviebox
+package com.msr.moviebox.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -15,15 +14,16 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
-import com.msr.moviebox.data.Dub
-import com.msr.moviebox.data.Episode
-import com.msr.moviebox.data.MovieBoxApi
-import com.msr.moviebox.data.PlayStream
-import com.msr.moviebox.data.Subject
-import com.msr.moviebox.ui.EpisodeAdapter
+import com.msr.moviebox.data.MovieBoxRepository
+import com.msr.moviebox.data.model.Dub
+import com.msr.moviebox.data.model.Episode
+import com.msr.moviebox.data.model.Subject
+import com.msr.moviebox.ui.adapter.EpisodeAdapter
 import kotlinx.coroutines.launch
 
 class DetailActivity : AppCompatActivity() {
+
+    private val repo = MovieBoxRepository()
 
     private var subjectId: String? = null
     private var subject: Subject? = null
@@ -60,7 +60,7 @@ class DetailActivity : AppCompatActivity() {
 
         lifecycleScope.launch {
             try {
-                val d = MovieBoxApi.detail(subjectId ?: return@launch) ?: return@launch
+                val d = repo.detail(subjectId ?: return@launch) ?: return@launch
                 subject = d
                 render(d)
             } catch (e: Exception) {
@@ -121,20 +121,10 @@ class DetailActivity : AppCompatActivity() {
     private fun loadSeasons(d: Subject) {
         lifecycleScope.launch {
             try {
-                val seasons = MovieBoxApi.seasons(d.subjectId)
-                val eps = ArrayList<Episode>()
-                for (s in seasons) {
-                    for (ep in 1..s.maxEp) {
-                        eps.add(
-                            Episode(
-                                subjectId = d.subjectId,
-                                se = s.se,
-                                ep = ep,
-                                label = getString(R.string.season) + " ${s.se}  •  " +
-                                    getString(R.string.episode) + " $ep"
-                            )
-                        )
-                    }
+                val seasons = repo.seasons(d.subjectId)
+                val eps = repo.buildEpisodes(d.subjectId, seasons) { se, ep ->
+                    getString(R.string.season) + " $se  •  " +
+                        getString(R.string.episode) + " $ep"
                 }
                 episodes = eps
                 episodesList.adapter = EpisodeAdapter(eps) { playEpisode(it) }
@@ -162,16 +152,7 @@ class DetailActivity : AppCompatActivity() {
     private fun play(subjectId: String, se: Int, ep: Int) {
         lifecycleScope.launch {
             try {
-                // Try the requested id first, then every dub id as fallback.
-                val candidates = LinkedHashSet<String>()
-                candidates.add(subjectId)
-                subject?.dubs?.forEach { candidates.add(it.subjectId) }
-                var stream: PlayStream? = null
-                for (cid in candidates) {
-                    val streams = MovieBoxApi.playInfo(cid, se, ep)
-                    if (streams.isNotEmpty()) { stream = streams.first(); break }
-                }
-                val chosen = stream ?: run {
+                val chosen = repo.playStream(subjectId, se, ep, subject?.dubs ?: emptyList()) ?: run {
                     Toast.makeText(this@DetailActivity, R.string.no_streams, Toast.LENGTH_LONG).show()
                     return@launch
                 }
