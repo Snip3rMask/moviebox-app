@@ -41,12 +41,12 @@ class SearchActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val items = MovieBoxApi.search(query)
-                resultsList.adapter = PosterAdapter(items) {
+                resultsList.adapter = PosterAdapter(items, {
                     startActivity(
                         Intent(this@SearchActivity, DetailActivity::class.java)
                             .putExtra("subjectId", it.subjectId)
                     )
-                }
+                })
             } catch (e: Exception) {
                 resultsList.adapter = null
             }
