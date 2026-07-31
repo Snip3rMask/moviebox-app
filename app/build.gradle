@@ -66,6 +66,8 @@ dependencies {
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'
+    implementation 'androidx.fragment:fragment-ktx:1.6.2'
+    implementation 'androidx.viewpager2:viewpager2:1.1.0'
 
     // Networking
     implementation 'com.squareup.okhttp3:okhttp:4.12.0'
