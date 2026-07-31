@@ -61,7 +61,7 @@ jobs:
           KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
         run: |
-          ./gradlew assembleRelease \
+          ./gradlew assembleRelease --stacktrace \
             -PversionName=${{ steps.version.outputs.version }} \
             -PversionCode=$(( $GITHUB_RUN_NUMBER ))
           ls -la app/build/outputs/apk/release/
