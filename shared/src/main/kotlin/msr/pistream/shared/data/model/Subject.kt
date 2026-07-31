@@ -23,6 +23,15 @@ data class Subject(
     val language: String = "",
     val isCam: Boolean = false,
     val subtitles: String = "",
+    val aka: String = "",
+    val durationSeconds: Long = 0,
+    val contentRating: String = "",
+    val viewers: Long = 0,
+    val haveSeenCount: Long = 0,
+    val wantToSeeCount: Long = 0,
+    val staffList: List<Staff> = emptyList(),
+    val trailer: Trailer? = null,
+    val stills: List<Cover>? = null,
     val dubs: List<Dub> = emptyList()
 ) {
     @Transient
