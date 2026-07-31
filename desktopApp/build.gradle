@@ -1,0 +1,39 @@
+plugins {
+    id 'org.jetbrains.kotlin.jvm'
+    id 'org.jetbrains.kotlin.plugin.compose'
+    id 'org.jetbrains.compose'
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
+    }
+}
+
+def appVersion = (findProperty('versionName') ?: '0.3.0').toString()
+
+compose.desktop {
+    application {
+        mainClass = 'msr.pistream.desktop.MainKt'
+        nativeDistributions {
+            targetFormats(org.jetbrains.compose.desktop.application.dsl.TargetFormat.Exe)
+            packageName = 'Pi-Stream'
+            packageVersion = appVersion
+            description = 'Pi-Stream desktop player (Windows)'
+            vendor = 'msr'
+        }
+    }
+}
+
+dependencies {
+    implementation(compose.desktop.currentOs)
+    implementation(compose.material3)
+    implementation(compose.foundation)
+    implementation(compose.runtime)
+    implementation project(':shared')
+}

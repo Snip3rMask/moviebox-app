@@ -16,7 +16,8 @@ Built as a clean-room Kotlin port of the verified API flow (anonymous JWT +
 - Series: season → episode list from `season-info`
 - Playback: Media3 ExoPlayer with DASH + HLS support, streams the MPD with the
   CloudFront `signCookie` sent as a `Cookie` header
-- GitHub Actions: tag push → build APK → **GitHub Release** (no artifact step)
+- GitHub Actions: tag push → build **Android APK + Windows installer** → same **GitHub Release**
+- Windows desktop app: Compose Desktop UI + bundled **mpv** player (same `shared/` data layer)
 
 ## Project layout
 ```
@@ -26,6 +27,10 @@ shared/src/main/kotlin/msr/pistream/shared/   # shared data layer (Android + PC)
 │   ├── MovieBoxApi.kt         # signed HTTP client (JWT + HMAC)
 │   ├── MovieBoxRepository.kt  # high-level data access + dub fallback
 │   └── model/                 # Subject / Dub / Episode / SeasonInfo / PlayStream
+
+desktopApp/src/main/kotlin/msr/pistream/desktop/   # PC (Windows) app
+├── Main.kt         # Compose Desktop UI (home / detail)
+└── Player.kt       # launches bundled mpv.exe
 
 app/src/main/java/msr/pistream/app/
 ├── data/
@@ -51,6 +56,13 @@ app/src/main/java/msr/pistream/app/
         ├── EpisodeAdapter.kt
         └── CarouselAdapter.kt
 ```
+
+## Desktop (Windows) notes
+- The installer bundles `mpv.exe` + DLLs from `desktopApp/src/main/resources/mpv/`.
+- Locally: download a Windows mpv build and extract it there before running
+  `./gradlew :desktopApp:packageExe`.
+- In CI, the workflow downloads the mpv build automatically, then attaches the
+  `.exe` installer to the same GitHub Release as the APK.
 
 ## Build locally
 Prerequisites: JDK 17, Android SDK (platform 34), Gradle 8.9 (via wrapper).
