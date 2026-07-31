@@ -6,17 +6,18 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
-import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
@@ -45,9 +46,7 @@ class HomeFragment : Fragment() {
         Row("Turkish Drama", "5177200225164885656"),
     )
 
-    private lateinit var searchInput: EditText
     private lateinit var carousel: ViewPager2
-    private lateinit var carouselSection: LinearLayout
     private lateinit var dotsIndicator: LinearLayout
     private lateinit var rowsContainer: LinearLayout
     private var dots: List<View> = emptyList()
@@ -66,9 +65,7 @@ class HomeFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View {
         val v = inflater.inflate(R.layout.fragment_home, container, false)
-        searchInput = v.findViewById(R.id.searchInput)
         carousel = v.findViewById(R.id.carousel)
-        carouselSection = v.findViewById(R.id.carouselSection)
         dotsIndicator = v.findViewById(R.id.dotsIndicator)
         rowsContainer = v.findViewById(R.id.rowsContainer)
 
@@ -76,11 +73,21 @@ class HomeFragment : Fragment() {
         (carousel.getChildAt(0) as? RecyclerView)?.isNestedScrollingEnabled = false
         carousel.registerOnPageChangeCallback(pageCallback)
 
-        v.findViewById<MaterialButton>(R.id.searchBtn).setOnClickListener { startSearch() }
-        searchInput.setOnEditorActionListener { _, _, _ ->
-            startSearch()
-            true
+        // Push the app bar below the status bar (content stays edge-to-edge).
+        val topBar = v.findViewById<View>(R.id.topBar)
+        ViewCompat.setOnApplyWindowInsetsListener(topBar) { view, insets ->
+            val top = insets.getInsets(WindowInsetsCompat.Type.systemBars()).top
+            val density = resources.displayMetrics.density
+            view.setPadding(
+                view.paddingLeft,
+                top + (8 * density).toInt(),
+                view.paddingRight,
+                view.paddingBottom
+            )
+            insets
         }
+
+        v.findViewById<ImageButton>(R.id.searchButton).setOnClickListener { openSearch() }
         return v
     }
 
@@ -105,19 +112,15 @@ class HomeFragment : Fragment() {
         super.onDestroyView()
     }
 
-    private fun startSearch() {
-        val q = searchInput.text.toString().trim()
-        if (q.isBlank()) return
-        startActivity(
-            Intent(requireContext(), SearchActivity::class.java).putExtra("query", q)
-        )
+    private fun openSearch() {
+        startActivity(Intent(requireContext(), SearchActivity::class.java))
     }
 
     private suspend fun loadCarousel() {
         try {
             val items = repo.homeRow(CATEGORY_TRENDING).take(10)
             if (items.isEmpty()) {
-                carouselSection.isVisible = false
+                carousel.isVisible = false
                 return
             }
             carouselCount = items.size
@@ -125,7 +128,7 @@ class HomeFragment : Fragment() {
             setupDots(items.size)
             startAutoScroll()
         } catch (e: Exception) {
-            carouselSection.isVisible = false
+            carousel.isVisible = false
         }
     }
 

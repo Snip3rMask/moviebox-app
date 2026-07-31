@@ -1,7 +1,10 @@
 package msr.pistream.app.ui
 
+import android.graphics.Color
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
+import androidx.core.view.WindowCompat
 import androidx.fragment.app.Fragment
 import com.google.android.material.bottomnavigation.BottomNavigationView
 import msr.pistream.app.R
@@ -17,6 +20,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Edge-to-edge: the home carousel draws behind the status bar.
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+        window.statusBarColor = Color.TRANSPARENT
+        window.navigationBarColor = ContextCompat.getColor(this, R.color.surface)
+
         setContentView(R.layout.activity_main)
 
         nav = findViewById(R.id.bottomNav)
