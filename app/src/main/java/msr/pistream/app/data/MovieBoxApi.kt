@@ -1,10 +1,10 @@
-package com.msr.moviebox.data
+package msr.pistream.app.data
 
 import android.util.Base64
-import com.msr.moviebox.data.model.Dub
-import com.msr.moviebox.data.model.PlayStream
-import com.msr.moviebox.data.model.SeasonInfo
-import com.msr.moviebox.data.model.Subject
+import msr.pistream.app.data.model.Dub
+import msr.pistream.app.data.model.PlayStream
+import msr.pistream.app.data.model.SeasonInfo
+import msr.pistream.app.data.model.Subject
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient

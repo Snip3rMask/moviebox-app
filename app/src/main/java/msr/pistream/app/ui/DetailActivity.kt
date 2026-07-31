@@ -1,6 +1,6 @@
-package com.msr.moviebox.ui
+package msr.pistream.app.ui
 
-import com.msr.moviebox.R
+import msr.pistream.app.R
 import android.content.Intent
 import android.os.Bundle
 import android.widget.ImageView
@@ -15,11 +15,11 @@ import androidx.recyclerview.widget.RecyclerView
 import coil.load
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
-import com.msr.moviebox.data.MovieBoxRepository
-import com.msr.moviebox.data.model.Dub
-import com.msr.moviebox.data.model.Episode
-import com.msr.moviebox.data.model.Subject
-import com.msr.moviebox.ui.adapter.EpisodeAdapter
+import msr.pistream.app.data.MovieBoxRepository
+import msr.pistream.app.data.model.Dub
+import msr.pistream.app.data.model.Episode
+import msr.pistream.app.data.model.Subject
+import msr.pistream.app.ui.adapter.EpisodeAdapter
 import kotlinx.coroutines.launch
 
 class DetailActivity : AppCompatActivity() {

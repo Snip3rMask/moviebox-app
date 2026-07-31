@@ -70,9 +70,9 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.version.outputs.tag }}
-          name: MovieBox ${{ steps.version.outputs.version }}
+          name: Pi-Stream ${{ steps.version.outputs.version }}
           body: |
-            Auto-built from the **MovieBoxApp** repository.
+            Auto-built from the **Pi-Stream** repository.
 
             - Version: `${{ steps.version.outputs.version }}`
             - Commit: `${{ github.sha }}`

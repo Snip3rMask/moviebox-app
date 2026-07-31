@@ -7,11 +7,11 @@ def appVersionCode = (findProperty('versionCode') ?: '1').toString().toInteger()
 def appVersionName = (findProperty('versionName') ?: '1.0.0').toString()
 
 android {
-    namespace 'com.msr.moviebox'
+    namespace 'msr.pistream.app'
     compileSdk 34
 
     defaultConfig {
-        applicationId 'com.msr.moviebox'
+        applicationId 'msr.pistream.app'
         minSdk 26
         targetSdk 34
         versionCode appVersionCode

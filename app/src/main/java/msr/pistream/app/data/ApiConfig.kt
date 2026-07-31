@@ -1,4 +1,4 @@
-package com.msr.moviebox.data
+package msr.pistream.app.data
 
 import android.util.Base64
 import org.json.JSONObject

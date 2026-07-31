@@ -1,12 +1,12 @@
-package com.msr.moviebox.ui.adapter
+package msr.pistream.app.ui.adapter
 
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.msr.moviebox.R
-import com.msr.moviebox.data.model.Episode
+import msr.pistream.app.R
+import msr.pistream.app.data.model.Episode
 
 /** Episode list adapter for series detail. */
 class EpisodeAdapter(

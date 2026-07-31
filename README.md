@@ -1,4 +1,4 @@
-# MovieBoxApp
+# Pi-Stream
 
 Native **Kotlin** Android streaming app that uses the MovieBox API
 (`apig.inmoviebox.com`) — home rows, search, title details, and DASH/HLS
@@ -18,7 +18,7 @@ Built as a clean-room Kotlin port of the verified API flow (anonymous JWT +
 
 ## Project layout
 ```
-app/src/main/java/com/msr/moviebox/
+app/src/main/java/msr/pistream/app/
 ├── data/
 │   ├── ApiConfig.kt           # API constants, device info, HMAC key
 │   ├── MovieBoxApi.kt         # signed HTTP client (JWT + HMAC)
@@ -66,7 +66,7 @@ Output: `app/build/outputs/apk/{debug,release}/app-{debug,release}.apk`
    git push origin v1.0.0
    ```
 4. The workflow builds `assembleRelease`, then creates a **GitHub Release**
-   named `MovieBox 1.0.0` with the APK attached directly
+   named `Pi-Stream 1.0.0` with the APK attached directly
    (`.github/workflows/build-release.yml`, `softprops/action-gh-release`).
 
 You can also run it manually: **Actions → Build & Release APK → Run workflow**

@@ -1,4 +1,4 @@
-package com.msr.moviebox.ui.adapter
+package msr.pistream.app.ui.adapter
 
 import android.view.LayoutInflater
 import android.view.View
@@ -7,8 +7,8 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
-import com.msr.moviebox.R
-import com.msr.moviebox.data.model.Subject
+import msr.pistream.app.R
+import msr.pistream.app.data.model.Subject
 
 /** Horizontal poster row adapter (also used for the search grid). */
 class PosterAdapter(

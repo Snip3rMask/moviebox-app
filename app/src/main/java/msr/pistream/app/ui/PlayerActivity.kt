@@ -1,6 +1,6 @@
-package com.msr.moviebox.ui
+package msr.pistream.app.ui
 
-import com.msr.moviebox.R
+import msr.pistream.app.R
 
 import android.os.Bundle
 import android.widget.Toast

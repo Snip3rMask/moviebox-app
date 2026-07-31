@@ -1,6 +1,6 @@
-package com.msr.moviebox.ui
+package msr.pistream.app.ui
 
-import com.msr.moviebox.R
+import msr.pistream.app.R
 import android.content.Intent
 import android.os.Bundle
 import android.widget.EditText
@@ -8,8 +8,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.msr.moviebox.data.MovieBoxRepository
-import com.msr.moviebox.ui.adapter.PosterAdapter
+import msr.pistream.app.data.MovieBoxRepository
+import msr.pistream.app.ui.adapter.PosterAdapter
 import kotlinx.coroutines.launch
 
 class SearchActivity : AppCompatActivity() {

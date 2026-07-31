@@ -1,4 +1,4 @@
-package com.msr.moviebox.data.model
+package msr.pistream.app.data.model
 
 data class PlayStream(
     val format: String,
