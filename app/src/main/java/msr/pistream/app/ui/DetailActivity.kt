@@ -201,7 +201,6 @@ class DetailActivity : AppCompatActivity() {
             chip.chipIcon = ContextCompat.getDrawable(this, R.drawable.ic_star)
             chip.chipIconSize = (14 * density)
             chip.chipIconTint = ColorStateList.valueOf(getColor(R.color.accent))
-            chip.setChipIconStartPadding(3 * density)
             chip.chipStartPadding = (6 * density)
         }
         group.addView(chip)
