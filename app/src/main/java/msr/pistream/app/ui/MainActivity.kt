@@ -31,9 +31,9 @@ class MainActivity : AppCompatActivity() {
         window.statusBarColor = Color.TRANSPARENT
         window.navigationBarColor = ContextCompat.getColor(this, R.color.surface)
 
-        val tv = isTv()
-        setContentView(if (tv) R.layout.activity_main_tv else R.layout.activity_main)
-        nav = if (tv) {
+        val rail = useRail()
+        setContentView(if (rail) R.layout.activity_main_tv else R.layout.activity_main)
+        nav = if (rail) {
             findViewById<NavigationRailView>(R.id.sideNav)
         } else {
             findViewById<BottomNavigationView>(R.id.bottomNav)
@@ -59,11 +59,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** Phones use a bottom bar; Android TV / Fire TV get a left-side rail. */
-    private fun isTv(): Boolean {
-        val uiMode = resources.configuration.uiMode and Configuration.UI_MODE_TYPE_MASK
-        return uiMode == Configuration.UI_MODE_TYPE_TELEVISION ||
-            packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)
+    /**
+     * Use the left-side rail on Android TV / Fire TV and on phones in
+     * landscape; portrait phones keep the bottom bar.
+     */
+    private fun useRail(): Boolean {
+        if (packageManager.hasSystemFeature(PackageManager.FEATURE_LEANBACK)) return true
+        val config = resources.configuration
+        val uiMode = config.uiMode and Configuration.UI_MODE_TYPE_MASK
+        if (uiMode == Configuration.UI_MODE_TYPE_TELEVISION) return true
+        return config.orientation == Configuration.ORIENTATION_LANDSCAPE
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
