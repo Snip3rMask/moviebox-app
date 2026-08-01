@@ -2,6 +2,7 @@ package msr.pistream.app.ui
 
 import android.graphics.Typeface
 import android.os.Bundle
+import android.util.TypedValue
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -141,7 +142,12 @@ class PlayerActivity : AppCompatActivity() {
         dialog.findViewById<View>(R.id.sheetCloseBtn)?.setOnClickListener { dialog.dismiss() }
         dialog.setOnShowListener {
             dialog.behavior.state = BottomSheetBehavior.STATE_EXPANDED
-            rebuildSettings(dialog)
+            try {
+                rebuildSettings(dialog)
+            } catch (e: Exception) {
+                dialog.dismiss()
+                Toast.makeText(this, R.string.failed_to_load, Toast.LENGTH_LONG).show()
+            }
         }
         settingsDialog = dialog
         dialog.show()
@@ -320,7 +326,7 @@ class PlayerActivity : AppCompatActivity() {
             orientation = LinearLayout.HORIZONTAL
             gravity = android.view.Gravity.CENTER_VERTICAL
             setPadding(0, dp(6), 0, dp(6))
-            setBackgroundResource(android.R.attr.selectableItemBackground)
+            setBackgroundResource(selectableItemBackground())
             isClickable = true
             setOnClickListener { onClick() }
         }
@@ -344,6 +350,12 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun dp(v: Int): Int = (v * resources.displayMetrics.density).toInt()
+
+    private fun selectableItemBackground(): Int {
+        val tv = TypedValue()
+        theme.resolveAttribute(android.R.attr.selectableItemBackground, tv, true)
+        return tv.resourceId
+    }
 
     // ---- activity lifecycle ----
 
