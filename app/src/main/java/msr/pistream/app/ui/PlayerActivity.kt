@@ -1,6 +1,7 @@
 package msr.pistream.app.ui
 
 import android.graphics.Typeface
+import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.View
@@ -183,7 +184,7 @@ class PlayerActivity : AppCompatActivity() {
         val url = currentStreamUrl ?: return
         val pos = p.currentPosition
         val subs = captions.map { c ->
-            MediaItem.SubtitleConfiguration.Builder(c.url)
+            MediaItem.SubtitleConfiguration.Builder(Uri.parse(c.url))
                 .setMimeType("text/srt")
                 .setLanguage(c.lan.ifBlank { null })
                 .setLabel(c.lanName.ifBlank { null })
