@@ -63,7 +63,10 @@ class PlayerActivity : AppCompatActivity() {
 
         val playerView = findViewById<PlayerView>(R.id.playerView)
         findViewById<TextView>(R.id.playerTitle).text = title
-        findViewById<View>(R.id.backBtn).setOnClickListener { finish() }
+        findViewById<View>(R.id.backBtn).setOnClickListener {
+            val dlg = settingsDialog
+            if (dlg != null && dlg.isShowing) dlg.dismiss() else finish()
+        }
         findViewById<View>(R.id.settingsBtn).setOnClickListener { showSettings() }
         playerView.setControllerVisibilityListener(
             object : PlayerView.ControllerVisibilityListener {
@@ -365,10 +368,9 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         switchJob?.cancel()
-        settingsDialog?.dismiss()
         settingsDialog = null
+        findViewById<PlayerView>(R.id.playerView).player = null
         player?.release()
         player = null
         super.onDestroy()
