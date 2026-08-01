@@ -398,10 +398,12 @@ class DetailActivity : AppCompatActivity() {
         val d = subject ?: return
         lifecycleScope.launch {
             try {
-                val chosen = repo.playStream(subjectId, se, ep, d.dubs) ?: run {
+                val resolved = repo.resolveStream(subjectId, se, ep, d.dubs) ?: run {
                     Toast.makeText(this@DetailActivity, R.string.no_streams, Toast.LENGTH_LONG).show()
                     return@launch
                 }
+                val chosen = resolved.stream
+                val detailPath = d.detailUrl.trimEnd('/').substringAfterLast('/')
                 val idName = LinkedHashMap<String, String>()
                 d.dubs.forEach { idName[it.subjectId] = it.lanName }
                 idName.putIfAbsent(subjectId, "Default")
@@ -415,6 +417,10 @@ class DetailActivity : AppCompatActivity() {
                         .putExtra("dubNames", ArrayList(idName.values))
                         .putExtra("se", se)
                         .putExtra("ep", ep)
+                        .putExtra("streamOwnerId", resolved.subjectId)
+                        .putExtra("streamId", chosen.id)
+                        .putExtra("streamFormat", chosen.format)
+                        .putExtra("detailPath", detailPath)
                 )
             } catch (e: Exception) {
                 Toast.makeText(this@DetailActivity, R.string.failed_to_load, Toast.LENGTH_LONG).show()

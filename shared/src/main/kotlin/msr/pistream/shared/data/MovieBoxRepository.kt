@@ -5,6 +5,7 @@ import msr.pistream.shared.data.model.Episode
 import msr.pistream.shared.data.model.PlayStream
 import msr.pistream.shared.data.model.SeasonInfo
 import msr.pistream.shared.data.model.Subject
+import msr.pistream.shared.data.model.SubjectCaption
 
 /**
  * High-level access to MovieBox data.
@@ -15,6 +16,9 @@ import msr.pistream.shared.data.model.Subject
 class MovieBoxRepository(
     private val api: MovieBoxApi = MovieBoxApi
 ) {
+
+    /** A playable stream plus the subject id that actually owns it. */
+    data class ResolvedStream(val stream: PlayStream, val subjectId: String)
 
     suspend fun ensureLogin() {
         if (api.token == null) api.loginAnonymous()
@@ -50,16 +54,40 @@ class MovieBoxRepository(
         se: Int,
         ep: Int,
         dubs: List<Dub> = emptyList()
-    ): PlayStream? {
+    ): PlayStream? = resolveStream(subjectId, se, ep, dubs)?.stream
+
+    /**
+     * Returns the first playable stream for [subjectId] at the given
+     * season/episode, together with the subject id that owns it. Movies use
+     * se=0&ep=0, series use the real values. Falls back to every dub id when
+     * the requested one has no streams.
+     */
+    suspend fun resolveStream(
+        subjectId: String,
+        se: Int,
+        ep: Int,
+        dubs: List<Dub> = emptyList()
+    ): ResolvedStream? {
         ensureLogin()
         val candidates = LinkedHashSet<String>()
         candidates.add(subjectId)
         dubs.forEach { candidates.add(it.subjectId) }
         for (id in candidates) {
             val streams = api.playInfo(id, se, ep)
-            if (streams.isNotEmpty()) return streams.first()
+            if (streams.isNotEmpty()) return ResolvedStream(streams.first(), id)
         }
         return null
+    }
+
+    /** Separate subtitle tracks for a stream (web player caption endpoint). */
+    suspend fun captions(
+        subjectId: String,
+        streamId: String,
+        format: String,
+        detailPath: String
+    ): List<SubjectCaption> {
+        ensureLogin()
+        return api.captions(subjectId, streamId, format, detailPath)
     }
 
     /**

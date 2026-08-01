@@ -29,6 +29,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import msr.pistream.app.R
 import msr.pistream.shared.data.MovieBoxRepository
+import msr.pistream.shared.data.model.SubjectCaption
 import java.util.Locale
 
 class PlayerActivity : AppCompatActivity() {
@@ -42,6 +43,12 @@ class PlayerActivity : AppCompatActivity() {
     private var se = 0
     private var ep = 0
     private var currentDubId: String? = null
+    private var streamOwnerId: String? = null
+    private var streamId: String? = null
+    private var streamFormat: String? = null
+    private var detailPath: String? = null
+    private var currentStreamUrl: String? = null
+    private var captionsJob: Job? = null
     private val dubIds = ArrayList<String>()
     private val dubNames = ArrayList<String>()
 
@@ -60,6 +67,10 @@ class PlayerActivity : AppCompatActivity() {
         currentDubId = intent.getStringExtra("subjectId")
         intent.getStringArrayListExtra("dubIds")?.let { dubIds.addAll(it) }
         intent.getStringArrayListExtra("dubNames")?.let { dubNames.addAll(it) }
+        streamOwnerId = intent.getStringExtra("streamOwnerId")
+        streamId = intent.getStringExtra("streamId")
+        streamFormat = intent.getStringExtra("streamFormat")
+        detailPath = intent.getStringExtra("detailPath")
 
         val playerView = findViewById<PlayerView>(R.id.playerView)
         findViewById<TextView>(R.id.playerTitle).text = title
@@ -85,6 +96,8 @@ class PlayerActivity : AppCompatActivity() {
         val playerView = findViewById<PlayerView>(R.id.playerView)
         playerView.player = null
         player?.release()
+        captionsJob?.cancel()
+        currentStreamUrl = url
 
         val dataSourceFactory = DefaultHttpDataSource.Factory()
             .setConnectTimeoutMs(20_000)
@@ -115,6 +128,7 @@ class PlayerActivity : AppCompatActivity() {
         p.setMediaItem(MediaItem.fromUri(url))
         p.prepare()
         p.playWhenReady = true
+        loadCaptions()
     }
 
     private fun reloadWithDub(dubId: String) {
@@ -129,12 +143,57 @@ class PlayerActivity : AppCompatActivity() {
                 }
                 val pos = player?.currentPosition ?: 0L
                 currentDubId = dubId
+                streamOwnerId = dubId
+                streamId = stream.id
+                streamFormat = stream.format
                 setupPlayer(stream.url, stream.signCookie ?: "")
                 player?.seekTo(pos)
             } catch (e: Exception) {
                 Toast.makeText(this@PlayerActivity, R.string.failed_to_load, Toast.LENGTH_LONG).show()
             }
         }
+    }
+
+    // ---- separate subtitles ----
+
+    /**
+     * MovieBox streams carry no embedded subtitle tracks; the web player loads
+     * them from a separate caption endpoint. Fetch them and sideload them into
+     * the current media item so they show up in the player's Subtitles sheet.
+     */
+    private fun loadCaptions() {
+        val owner = streamOwnerId ?: return
+        val sid = streamId ?: return
+        val fmt = streamFormat ?: return
+        val path = detailPath ?: return
+        captionsJob?.cancel()
+        captionsJob = lifecycleScope.launch {
+            try {
+                val list = repo.captions(owner, sid, fmt, path)
+                if (list.isEmpty()) return@launch
+                applyCaptions(list)
+            } catch (e: Exception) {
+                // Subtitles are optional; never break playback over them.
+            }
+        }
+    }
+
+    private fun applyCaptions(captions: List<SubjectCaption>) {
+        val p = player ?: return
+        val url = currentStreamUrl ?: return
+        val pos = p.currentPosition
+        val subs = captions.map { c ->
+            MediaItem.SubtitleConfiguration.Builder(c.url)
+                .setMimeType("text/srt")
+                .setLanguage(c.lan.ifBlank { null })
+                .setLabel(c.lanName.ifBlank { null })
+                .setSelectionFlags(if (c.lan.equals("en", true)) C.SELECTION_FLAG_DEFAULT else 0)
+                .build()
+        }
+        val item = MediaItem.Builder().setUri(url).setSubtitleConfigurations(subs).build()
+        p.setMediaItem(item, pos)
+        p.prepare()
+        p.playWhenReady = true
     }
 
     // ---- settings sheet ----
@@ -369,6 +428,7 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         switchJob?.cancel()
+        captionsJob?.cancel()
         settingsDialog = null
         findViewById<PlayerView>(R.id.playerView).player = null
         player?.release()

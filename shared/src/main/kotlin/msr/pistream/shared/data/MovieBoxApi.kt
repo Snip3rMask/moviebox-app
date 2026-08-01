@@ -13,6 +13,7 @@ import kotlinx.serialization.json.put
 import msr.pistream.shared.data.model.PlayStream
 import msr.pistream.shared.data.model.SeasonInfo
 import msr.pistream.shared.data.model.Subject
+import msr.pistream.shared.data.model.SubjectCaption
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -222,6 +223,34 @@ object MovieBoxApi {
         val streams = body.asObject()?.obj("data")?.arr("streams") ?: JsonArray(emptyList())
         return streams.mapNotNull {
             runCatching { json.decodeFromString<PlayStream>(it.toString()) }.getOrNull()
+        }
+    }
+
+    /**
+     * Fetches the separate subtitle tracks for a stream from the web player's
+     * caption endpoint. Unlike the mobile API this endpoint is not signed; it
+     * is called exactly like the moviebox.ph web player does.
+     */
+    suspend fun captions(
+        subjectId: String,
+        streamId: String,
+        format: String,
+        detailPath: String
+    ): List<SubjectCaption> = withContext(Dispatchers.IO) {
+        val url = "https://h5-api.aoneroom.com/wefeed-h5api-bff/subject/caption" +
+            "?format=$format&id=$streamId&subjectId=$subjectId&detailPath=$detailPath"
+        val req = Request.Builder().url(url)
+            .header("user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) " +
+                "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0 Safari/537.36")
+            .get()
+            .build()
+        http.newCall(req).execute().use { resp ->
+            val body = runCatching { json.parseToJsonElement(resp.body?.string() ?: "{}") }
+                .getOrElse { JsonObject(emptyMap()) }
+            val captions = body.asObject()?.obj("data")?.arr("captions") ?: JsonArray(emptyList())
+            captions.mapNotNull {
+                runCatching { json.decodeFromString<SubjectCaption>(it.toString()) }.getOrNull()
+            }
         }
     }
 }

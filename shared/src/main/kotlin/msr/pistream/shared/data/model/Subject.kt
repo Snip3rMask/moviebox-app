@@ -10,6 +10,7 @@ data class Cover(val url: String = "")
 @Serializable
 data class Subject(
     val subjectId: String = "",
+    @SerialName("detailUrl") val detailUrl: String = "",
     val subjectType: Int = 0,
     val title: String = "",
     val description: String = "",
