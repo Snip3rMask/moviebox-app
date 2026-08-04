@@ -16,6 +16,7 @@ import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.C
 import androidx.media3.common.Format
+import androidx.media3.common.MimeTypes
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
@@ -212,6 +213,13 @@ class PlayerActivity : AppCompatActivity() {
                     Toast.LENGTH_LONG
                 ).show()
             }
+
+            override fun onTracksChanged(tracks: Tracks) {
+                val dlg = settingsDialog
+                if (dlg != null && dlg.isShowing) {
+                    runCatching { rebuildSettings(dlg) }
+                }
+            }
         })
         p.setMediaItem(MediaItem.fromUri(url))
         p.prepare()
@@ -272,7 +280,7 @@ class PlayerActivity : AppCompatActivity() {
         val pos = p.currentPosition
         val subs = captions.map { c ->
             MediaItem.SubtitleConfiguration.Builder(Uri.parse(c.url))
-                .setMimeType("text/srt")
+                .setMimeType(MimeTypes.APPLICATION_SUBRIP)
                 .setLanguage(c.lan.ifBlank { null })
                 .setLabel(c.lanName.ifBlank { null })
                 .setSelectionFlags(if (c.lan.equals("en", true)) C.SELECTION_FLAG_DEFAULT else 0)
