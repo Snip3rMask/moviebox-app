@@ -25,7 +25,7 @@ the next phase. Architecture details: see [migration-plan.md](migration-plan.md)
 - [x] Reproduce: `stills` returns a single dict on ~18/60 titles
 - [x] Normalize `stills`: keep raw `JsonElement`, expose `stillsList` (dict OR list)
 - [x] Unit tests: object / list / absent / invalid -> correct `stillsList`
-- [ ] Release v0.4.4 (CI green)
+- [x] Release v0.4.4 (CI green)
 
 ## Phase 1 — Tooling Foundation (target v0.5.0)
 - [ ] `gradle/libs.versions.toml` version catalog (all deps centralized)
