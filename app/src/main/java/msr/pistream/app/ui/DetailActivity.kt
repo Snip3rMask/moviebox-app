@@ -357,7 +357,7 @@ class DetailActivity : AppCompatActivity() {
     // ---- stills + trailer ----
 
     private fun setupStills(d: Subject) {
-        val stills = d.stills?.filter { it.url.isNotBlank() }.orEmpty()
+        val stills = d.stillsList.filter { it.url.isNotBlank() }
         if (stills.isEmpty()) return
         photosLabel.isVisible = true
         stillsList.isVisible = true
