@@ -1,10 +1,12 @@
 package msr.pistream.app.ui
 
+import android.content.res.Configuration
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.View
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -24,12 +26,17 @@ import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.ui.PlayerView
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import msr.pistream.app.R
+import msr.pistream.app.ui.adapter.PlayerEpisodeAdapter
 import msr.pistream.shared.data.MovieBoxRepository
+import msr.pistream.shared.data.model.Dub
+import msr.pistream.shared.data.model.Episode
 import msr.pistream.shared.data.model.SubjectCaption
 import java.util.Locale
 
@@ -50,6 +57,13 @@ class PlayerActivity : AppCompatActivity() {
     private var detailPath: String? = null
     private var currentStreamUrl: String? = null
     private var captionsJob: Job? = null
+    private var titleText = ""
+    private var epSubjectId: String? = null
+    private val episodes = ArrayList<Episode>()
+    private val epSe = ArrayList<Int>()
+    private val epEp = ArrayList<Int>()
+    private val epLabels = ArrayList<String>()
+    private var episodesAdapter: PlayerEpisodeAdapter? = null
     private val dubIds = ArrayList<String>()
     private val dubNames = ArrayList<String>()
 
@@ -62,7 +76,7 @@ class PlayerActivity : AppCompatActivity() {
             return
         }
         val cookie = intent.getStringExtra("cookie").orEmpty()
-        val title = intent.getStringExtra("title").orEmpty()
+        titleText = intent.getStringExtra("title").orEmpty()
         se = intent.getIntExtra("se", 0)
         ep = intent.getIntExtra("ep", 0)
         currentDubId = intent.getStringExtra("subjectId")
@@ -72,9 +86,13 @@ class PlayerActivity : AppCompatActivity() {
         streamId = intent.getStringExtra("streamId")
         streamFormat = intent.getStringExtra("streamFormat")
         detailPath = intent.getStringExtra("detailPath")
+        epSubjectId = intent.getStringExtra("epSubjectId")
+        intent.getIntegerArrayListExtra("epSe")?.let { epSe.addAll(it) }
+        intent.getIntegerArrayListExtra("epEp")?.let { epEp.addAll(it) }
+        intent.getStringArrayListExtra("epLabels")?.let { epLabels.addAll(it) }
 
         val playerView = findViewById<PlayerView>(R.id.playerView)
-        findViewById<TextView>(R.id.playerTitle).text = title
+        findViewById<TextView>(R.id.playerTitle).text = titleText
         findViewById<View>(R.id.backBtn).setOnClickListener {
             val dlg = settingsDialog
             if (dlg != null && dlg.isShowing) dlg.dismiss() else finish()
@@ -88,7 +106,76 @@ class PlayerActivity : AppCompatActivity() {
             }
         )
 
+        setupEpisodes()
+        applyPlayerSize()
         setupPlayer(url, cookie)
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        applyPlayerSize()
+    }
+
+    // ---- episodes below the player ----
+
+    private fun setupEpisodes() {
+        val sub = epSubjectId
+        val count = minOf(epSe.size, epEp.size, epLabels.size)
+        if (sub == null || count == 0) return
+        for (i in 0 until count) {
+            episodes.add(Episode(subjectId = sub, se = epSe[i], ep = epEp[i], label = epLabels[i]))
+        }
+        val list = findViewById<RecyclerView>(R.id.episodesList)
+        list.layoutManager = LinearLayoutManager(this)
+        episodesAdapter = PlayerEpisodeAdapter(
+            episodes,
+            isSelected = { it.se == se && it.ep == ep },
+            onClick = { switchEpisode(it) }
+        )
+        list.adapter = episodesAdapter
+    }
+
+    private fun applyPlayerSize() {
+        val container = findViewById<FrameLayout>(R.id.playerContainer)
+        val below = findViewById<View>(R.id.playerBelow)
+        val landscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+        val lp = container.layoutParams
+        if (landscape) {
+            lp.height = FrameLayout.LayoutParams.MATCH_PARENT
+            below.isVisible = false
+        } else {
+            val width = resources.displayMetrics.widthPixels
+            lp.height = (width * 9f / 16f).toInt()
+            below.isVisible = episodes.isNotEmpty()
+        }
+        container.layoutParams = lp
+    }
+
+    private fun switchEpisode(target: Episode) {
+        if (target.se == se && target.ep == ep) return
+        switchJob?.cancel()
+        switchJob = lifecycleScope.launch {
+            try {
+                val dubs = dubIds.map { Dub(subjectId = it) }
+                val resolved = repo.resolveStream(target.subjectId, target.se, target.ep, dubs)
+                val stream = resolved?.stream ?: run {
+                    Toast.makeText(this@PlayerActivity, R.string.no_streams, Toast.LENGTH_LONG).show()
+                    return@launch
+                }
+                se = target.se
+                ep = target.ep
+                currentDubId = target.subjectId
+                streamOwnerId = resolved.subjectId
+                streamId = stream.id
+                streamFormat = stream.format
+                setupPlayer(stream.url, stream.signCookie ?: "")
+                findViewById<TextView>(R.id.playerTitle).text =
+                    titleText + "  •  " + target.label
+                episodesAdapter?.notifyDataSetChanged()
+            } catch (e: Exception) {
+                Toast.makeText(this@PlayerActivity, R.string.failed_to_load, Toast.LENGTH_LONG).show()
+            }
+        }
     }
 
     // ---- player lifecycle ----

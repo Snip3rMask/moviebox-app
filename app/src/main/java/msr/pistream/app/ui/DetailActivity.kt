@@ -421,6 +421,10 @@ class DetailActivity : AppCompatActivity() {
                         .putExtra("streamId", chosen.id)
                         .putExtra("streamFormat", chosen.format)
                         .putExtra("detailPath", detailPath)
+                        .putExtra("epSubjectId", d.subjectId)
+                        .putExtra("epSe", ArrayList(episodes.map { it.se }))
+                        .putExtra("epEp", ArrayList(episodes.map { it.ep }))
+                        .putExtra("epLabels", ArrayList(episodes.map { it.label }))
                 )
             } catch (e: Exception) {
                 Toast.makeText(this@DetailActivity, R.string.failed_to_load, Toast.LENGTH_LONG).show()
